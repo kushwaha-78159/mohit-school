@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, GraduationCap, Phone } from "lucide-react";
+import { Menu, X, Phone } from "lucide-react";
 import { useState } from "react";
 
 const links = [
@@ -21,8 +21,12 @@ export default function Header() {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
 
         <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#071a35] text-yellow-400">
-            <GraduationCap size={26} />
+          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-white">
+            <img
+              src="/manya-school-logo.png"
+              alt="Manya Public School Logo"
+              className="h-full w-full object-contain"
+            />
           </div>
 
           <div>
