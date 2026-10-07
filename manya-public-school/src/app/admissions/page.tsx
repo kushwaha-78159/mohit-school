@@ -1,10 +1,63 @@
+"use client";
+
 import Link from "next/link";
+import { FormEvent, useState } from "react";
 import { ArrowLeft, CheckCircle2, GraduationCap } from "lucide-react";
 
 const inputClass =
   "mt-2 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-slate-900 placeholder:text-slate-500 placeholder:font-medium outline-none transition focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10";
 
 export default function AdmissionsPage() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/admissions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studentName: formData.get("studentName"),
+          parentName: formData.get("parentName"),
+          phone: formData.get("phone"),
+          email: formData.get("email"),
+          className: formData.get("className"),
+          message: formData.get("message"),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to submit enquiry.");
+      }
+
+      setSuccess(
+        "Admission enquiry submitted successfully! The school will contact you soon."
+      );
+      form.reset();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to submit enquiry. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main>
       <section className="bg-[#071a35] px-6 py-20 text-white">
@@ -24,9 +77,10 @@ export default function AdmissionsPage() {
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-8 px-6 py-16 lg:grid-cols-[1fr_360px]">
-
-        <form className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
-
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl"
+        >
           <div className="mb-8 flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#071a35] text-yellow-400">
               <GraduationCap />
@@ -38,18 +92,20 @@ export default function AdmissionsPage() {
               </h2>
 
               <p className="text-sm text-slate-600">
-                Fields marked with <span className="font-bold text-red-500">*</span> are required.
+                Fields marked with{" "}
+                <span className="font-bold text-red-500">*</span> are required.
               </p>
             </div>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">
-
             <div>
               <label className="font-bold text-[#071a35]">
                 Student Name <span className="text-red-500">*</span>
               </label>
               <input
+                name="studentName"
+                required
                 placeholder="Enter student's full name"
                 className={inputClass}
               />
@@ -57,9 +113,12 @@ export default function AdmissionsPage() {
 
             <div>
               <label className="font-bold text-[#071a35]">
-                Parent / Guardian Name <span className="text-red-500">*</span>
+                Parent / Guardian Name{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
+                name="parentName"
+                required
                 placeholder="Enter parent or guardian name"
                 className={inputClass}
               />
@@ -70,7 +129,9 @@ export default function AdmissionsPage() {
                 Phone Number <span className="text-red-500">*</span>
               </label>
               <input
+                name="phone"
                 type="tel"
+                required
                 placeholder="Enter contact number"
                 className={inputClass}
               />
@@ -81,6 +142,7 @@ export default function AdmissionsPage() {
                 Email Address
               </label>
               <input
+                name="email"
                 type="email"
                 placeholder="Enter email address"
                 className={inputClass}
@@ -92,8 +154,15 @@ export default function AdmissionsPage() {
                 Select Class <span className="text-red-500">*</span>
               </label>
 
-              <select className={inputClass}>
-                <option>Select the class for admission</option>
+              <select
+                name="className"
+                required
+                defaultValue=""
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  Select the class for admission
+                </option>
                 <option>Nursery</option>
                 <option>L.K.G</option>
                 <option>U.K.G</option>
@@ -117,17 +186,31 @@ export default function AdmissionsPage() {
             </label>
 
             <textarea
+              name="message"
               rows={5}
               placeholder="Write any question or additional information..."
               className={inputClass}
             />
           </div>
 
+          {success && (
+            <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 font-semibold text-green-700">
+              {success}
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700">
+              {error}
+            </div>
+          )}
+
           <button
-            type="button"
-            className="mt-5 w-full rounded-xl bg-yellow-400 px-5 py-4 font-black text-[#071a35] transition hover:bg-yellow-300"
+            type="submit"
+            disabled={loading}
+            className="mt-5 w-full rounded-xl bg-yellow-400 px-5 py-4 font-black text-[#071a35] transition hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Submit Admission Enquiry
+            {loading ? "Submitting..." : "Submit Admission Enquiry"}
           </button>
         </form>
 

@@ -1,9 +1,58 @@
+"use client";
+
+import { FormEvent, useState } from "react";
 import { MapPin, Phone, Send } from "lucide-react";
 
 const inputClass =
   "mt-2 w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3.5 text-slate-900 placeholder:text-slate-500 placeholder:font-medium outline-none transition focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10";
 
 export default function ContactPage() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          phone: formData.get("phone"),
+          email: formData.get("email"),
+          message: formData.get("message"),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to send message.");
+      }
+
+      setSuccess("Message sent successfully! The school will contact you soon.");
+      form.reset();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to send message. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <main>
       <section className="bg-[#071a35] px-6 py-20 text-white">
@@ -22,7 +71,6 @@ export default function ContactPage() {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-8 px-6 py-16 lg:grid-cols-2 lg:px-8">
-
         <div className="rounded-3xl bg-[#071a35] p-8 text-white shadow-xl">
           <h2 className="text-3xl font-black">School Information</h2>
 
@@ -46,7 +94,9 @@ export default function ContactPage() {
               </div>
 
               <div>
-                <p className="font-bold text-yellow-400">School Phone Number</p>
+                <p className="font-bold text-yellow-400">
+                  School Phone Number
+                </p>
                 <a
                   href="tel:+919873566144"
                   className="mt-1 block text-lg font-semibold text-white hover:text-yellow-400"
@@ -66,7 +116,10 @@ export default function ContactPage() {
           </a>
         </div>
 
-        <form className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl"
+        >
           <h2 className="text-3xl font-black text-[#071a35]">
             Send a Message
           </h2>
@@ -76,12 +129,13 @@ export default function ContactPage() {
           </p>
 
           <div className="mt-7 space-y-5">
-
             <div>
               <label className="font-bold text-[#071a35]">
                 Your Name <span className="text-red-500">*</span>
               </label>
               <input
+                name="name"
+                required
                 placeholder="Enter your full name"
                 className={inputClass}
               />
@@ -92,7 +146,9 @@ export default function ContactPage() {
                 Phone Number <span className="text-red-500">*</span>
               </label>
               <input
+                name="phone"
                 type="tel"
+                required
                 placeholder="Enter your phone number"
                 className={inputClass}
               />
@@ -103,6 +159,7 @@ export default function ContactPage() {
                 Email Address
               </label>
               <input
+                name="email"
                 type="email"
                 placeholder="Enter your email address"
                 className={inputClass}
@@ -114,18 +171,33 @@ export default function ContactPage() {
                 Your Message <span className="text-red-500">*</span>
               </label>
               <textarea
+                name="message"
+                required
                 rows={5}
                 placeholder="Write your question or message here..."
                 className={inputClass}
               />
             </div>
 
+            {success && (
+              <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 font-semibold text-green-700">
+                {success}
+              </div>
+            )}
+
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700">
+                {error}
+              </div>
+            )}
+
             <button
-              type="button"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#071a35] px-5 py-4 font-bold text-white transition hover:bg-[#0c2850]"
+              type="submit"
+              disabled={loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#071a35] px-5 py-4 font-bold text-white transition hover:bg-[#0c2850] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Send size={18} />
-              Send Message
+              {loading ? "Sending..." : "Send Message"}
             </button>
           </div>
         </form>
