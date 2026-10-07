@@ -91,20 +91,12 @@ export default function Home() {
             <div className="absolute -inset-3 rounded-[2rem] bg-yellow-400/20 blur-2xl" />
 
             <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/10 p-2 shadow-2xl">
-              <div className="flex aspect-[16/10] items-center justify-center overflow-hidden rounded-[1.5rem] bg-slate-800">
-                <div className="px-8 text-center text-white">
-                  <GraduationCap
-                    size={64}
-                    className="mx-auto mb-4 text-yellow-400"
-                  />
-                  <p className="text-2xl font-bold">Manya Public School</p>
-                  <p className="mt-2 text-slate-300">
-                    Admissions Open 2026–27
-                  </p>
-                  <p className="mt-4 text-sm text-slate-400">
-                    Your supplied admission image will be placed here.
-                  </p>
-                </div>
+              <div className="aspect-[16/10] overflow-hidden rounded-[1.5rem] bg-slate-800">
+                <img
+                  src="/images/home-hero.jpeg"
+                  alt="Manya Public School Admissions 2026-27"
+                  className="h-full w-full object-cover object-center"
+                />
               </div>
             </div>
           </div>
